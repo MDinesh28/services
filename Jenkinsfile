@@ -5,7 +5,7 @@ pipeline {
         AWS_REGION = "ap-south-1"
         EKS_CLUSTER_NAME = "EKS-1"
         KUBERNETES_NAMESPACE = "default"
-        GIT_REPO = "https://github.com/your-repo/webapp.git"
+        GIT_REPO = "https://github.com/MDinesh28/services.git"
     }
 
     stages {
