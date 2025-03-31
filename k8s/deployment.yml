@@ -15,6 +15,6 @@ spec:
     spec:
       containers:
         - name: webapp
-          image: mdinesh28/job-portal
+          image: mdinesh28/candycrush
           ports:
             - containerPort: 80
