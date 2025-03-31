@@ -1,20 +1,39 @@
 pipeline {
     agent any
 
+    environment {
+        AWS_REGION = "ap-south-1"
+        EKS_CLUSTER_NAME = "EKS-1"
+        KUBERNETES_NAMESPACE = "default"
+        GIT_REPO = "https://github.com/your-repo/webapp.git"
+    }
+
     stages {
-        stage('Deploy To Kubernetes') {
+        stage('Clone Repository') {
             steps {
-                withKubeCredentials(kubectlCredentials: [[caCertificate: '', clusterName: 'EKS-1', contextName: '', credentialsId: 'k8s', namespace: 'webapps', serverUrl: 'https://3BE01E1738C9DDFB76E4AA2E09AC59E3.gr7.ap-south-1.eks.amazonaws.com']]) {
-                    sh "kubectl apply -f deployment-service.yml"
+                git branch: 'main', url: "${GIT_REPO}"
+            }
+        }
+
+        stage('Deploy to EKS') {
+            steps {
+                script {
+                    sh """
+                        aws eks --region $AWS_REGION update-kubeconfig --name $EKS_CLUSTER_NAME
+                        kubectl apply -f k8s/deployment.yaml
+                        kubectl apply -f k8s/service.yaml
+                    """
                 }
             }
         }
-        stage('Verify Deployment') {
-            steps {
-                withKubeCredentials(kubectlCredentials: [[caCertificate: '', clusterName: 'EKS-1', contextName: '', credentialsId: 'k8s', namespace: 'webapps', serverUrl: 'https://3BE01E1738C9DDFB76E4AA2E09AC59E3.gr7.ap-south-1.eks.amazonaws.com']]) {
-                    sh "kubectl get svc -n webapps"
-                }
-            }
+    }
+
+    post {
+        success {
+            echo "Deployment successful!"
+        }
+        failure {
+            echo "Deployment failed!"
         }
     }
 }
